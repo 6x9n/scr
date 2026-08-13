@@ -12,7 +12,7 @@ concurrency:
 jobs:
   scrape:
     runs-on: ubuntu-latest
-    timeout-minutes: 360
+    timeout-minutes: 1440
     permissions:
       contents: write
     steps:
@@ -32,8 +32,13 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
+      - name: Checkout branch (avoid detached HEAD)
+        run: git checkout -B "${GITHUB_REF_NAME}" "origin/${GITHUB_REF_NAME}"
+
       - name: Run scraper
-        run: python scrape.py
+        run: python -u scrape.py
+        env:
+          PYTHONUNBUFFERED: "1"
 
       - name: Final safety commit
         if: always()
